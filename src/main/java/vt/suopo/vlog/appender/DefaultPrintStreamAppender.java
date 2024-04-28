@@ -9,7 +9,7 @@ import java.io.PrintStream;
 import java.util.Objects;
 
 /**
- * 默认日志输出-控制台
+ * 默认日志输出-打印流
  *
  * @author suopovate
  * @since 2024/04/27

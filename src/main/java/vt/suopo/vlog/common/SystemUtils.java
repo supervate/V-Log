@@ -19,8 +19,8 @@ public final class SystemUtils {
     private SystemUtils() {}
 
     /**
-     * @throws java.nio.file.InvalidPathException if a {@code Path} object cannot be constructed from the abstract
-     *                                            path (see {@link java.nio.file.FileSystem#getPath FileSystem.getPath})
+     * @throws java.nio.file.InvalidPathException if a {@code Path} object cannot be constructed from the abstract path
+     * (see {@link java.nio.file.FileSystem#getPath FileSystem.getPath})
      */
     public static Path getSysPropertyPath(String name) {
         if (Objects.isNull(System.getProperty(name)) || System.getProperty(name).isEmpty()) {
@@ -35,30 +35,6 @@ public final class SystemUtils {
 
     public static Path getSysTempDir() {
         return Paths.get(System.getProperty("java.io.tmpdir"));
-    }
-
-    /**
-     * get the injectDir for store the class to be injected
-     *
-     * @param injectDir the real directory
-     * @return the absolute path of injectDir
-     */
-    private static Path getClassInjectTempDirPath(String injectDir) {
-        return getSysTempDir().resolve(Constants.INJECT_DIR_ROOT).resolve(injectDir);
-    }
-
-    /**
-     * get the injectDir for store the class to be injected
-     *
-     * @param injectDir the real directory
-     * @return the absolute path of injectDir
-     */
-    public static File getClassInjectTempDir(String injectDir) throws IOException {
-        Path dirPath = getClassInjectTempDirPath(injectDir);
-        if (!Files.exists(dirPath)) {
-            Files.createDirectories(dirPath);
-        }
-        return dirPath.toFile();
     }
 
 }
