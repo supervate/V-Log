@@ -1,7 +1,7 @@
 .PHONY: test build
 
 test:
-	@mvn test
+	@mvn test --file pom.xml
 
-build: test
+build:
 	@mvn package
