@@ -24,6 +24,13 @@
         </developer>
     </developers>
 
+    <scm>
+        <connection>scm:git:${repository-url}</connection>
+        <developerConnection>scm:git:${repository-url}</developerConnection>
+        <url>${repository-url}</url>
+    </scm>
+
+
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <junit.version>5.8.1</junit.version>
@@ -31,6 +38,7 @@
         <compiler-release.version>8</compiler-release.version>
         <jackson.version>2.17.0</jackson.version>
         <maven-central-publish-plugin.version>0.4.0</maven-central-publish-plugin.version>
+        <repository-url>git@github.com:supervate/V-Log.git</repository-url>
     </properties>
 
     <dependencies>
