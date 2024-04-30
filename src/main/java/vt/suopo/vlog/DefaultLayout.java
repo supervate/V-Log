@@ -8,7 +8,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Optional;
 
-import static vt.suopo.vlog.common.LogConstants.*;
+import static vt.suopo.vlog.common.Constants.*;
 
 
 /**

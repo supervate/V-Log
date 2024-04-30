@@ -10,15 +10,20 @@ import vt.suopo.vlog.event.LogEvent;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
-import static vt.suopo.vlog.common.LogConstants.SYSTEM_PROPERTY_LOG_DIR;
-import static vt.suopo.vlog.common.LogConstants.SYSTEM_PROPERTY_LOG_LEVEL;
+import static vt.suopo.vlog.common.Constants.*;
 
 /**
  * 日志工厂
  * <p>
  * 暂提供如下配置(通过SystemProperty配置):
- * 1. autotrace4j.log.dir autotrace4j产生的日志文件存放目录
- * 2. autotrace4j.log.level autotrace4j产生的日志的最低级别,大于对应级别的日志才会被打印.
+ * <li>
+ * 1. vt.vlog.dir 产生的日志文件存放目录
+ * <li>
+ * 2. vt.vlog.level 产生的日志的最低级别,大于对应级别的日志才会被打印.
+ * <li>
+ * 3. vt.vlog.file.retention 产生的日志文件存放时间,保留多少天,默认为7天.(单位天)
+ * <li>
+ * 4. vt.vlog.file.size 产生的日志文件大小,超过多少字节后,产生新的文件,默认为0,不限制.(单位字节)
  *
  * @author suopovate
  * @since 2024/04/27
@@ -43,10 +48,19 @@ public class LoggerFactory {
         );
         defaultPrintStreamAppender.start();
         APPENDER_COMBINER.addAppender(defaultPrintStreamAppender);
-        Optional
-            .ofNullable(SystemUtils.getSysPropertyPath(SYSTEM_PROPERTY_LOG_DIR))
+        SystemUtils
+            .getSysPropertyPath(SYSTEM_PROPERTY_LOG_DIR)
             .ifPresent(path -> {
-                DefaultFileAppender defaultFileAppender = new DefaultFileAppender(new DefaultLayout(), path);
+                DefaultFileAppender defaultFileAppender = new DefaultFileAppender(
+                    new DefaultLayout(),
+                    path,
+                    SystemUtils
+                        .getSysPropertyInteger(SYSTEM_PROPERTY_LOG_FILE_RETENTION)
+                        .orElse(DEFAULT_LOG_FILE_RETENTION),
+                    SystemUtils
+                        .getSysPropertyInteger(SYSTEM_PROPERTY_LOG_FILE_SIZE)
+                        .orElse(DEFAULT_LOG_FILE_SIZE)
+                );
                 defaultFileAppender.start();
                 APPENDER_COMBINER.addAppender(defaultFileAppender);
             });
@@ -67,7 +81,7 @@ public class LoggerFactory {
         return logger(clazz.getCanonicalName());
     }
 
-    static public Logger logger(String name) {
+    public static Logger logger(String name) {
         Logger logger = LOGGER_MAP.get(name);
         if (logger == null) {
             logger = new Logger(name, APPENDER_COMBINER, LEVEL);

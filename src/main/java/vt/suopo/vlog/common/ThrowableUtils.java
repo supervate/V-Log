@@ -3,7 +3,7 @@ package vt.suopo.vlog.common;
 import java.util.LinkedList;
 import java.util.List;
 
-import static vt.suopo.vlog.common.LogConstants.CAUSED_BY;
+import static vt.suopo.vlog.common.Constants.CAUSED_BY;
 
 /**
  * 异常处理工具类
