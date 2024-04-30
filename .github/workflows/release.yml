@@ -19,7 +19,7 @@ jobs:
       - name: Release Maven Central
         uses: samuelmeuli/action-maven-publish@v1.4.0
         with:
-          server_id: central
+          server_id: ossrh
           gpg_private_key: ${{ secrets.MAVEN_GPG_PRIVATE_KEY }}
           gpg_passphrase: ${{ secrets.MAVEN_GPG_PASSPHRASE }}
           nexus_username: ${{ secrets.OSSRH_USERNAME }}
