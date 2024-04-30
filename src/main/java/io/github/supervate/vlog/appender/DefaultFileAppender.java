@@ -234,7 +234,7 @@ public class DefaultFileAppender extends AsyncAppender<LogEvent> {
         return logFileSizeBytes <= 0 || (pathAndChannel.getO2().size() + messageLength <= logFileSizeBytes);
     }
 
-    private boolean isSuperMessage(int messageLength) throws IOException {
+    private boolean isSuperMessage(int messageLength) {
         return logFileSizeBytes > 0 && messageLength > logFileSizeBytes;
     }
 

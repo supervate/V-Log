@@ -172,7 +172,7 @@ public final class ReflectUtils {
         private Method method;
         private Object object;
 
-        private MethodWrapper(){}
+        private MethodWrapper() {}
 
         public static MethodWrapper of(Object obj, String methodName, boolean declared, Class<?>... parameterTypes) {
             MethodWrapper wrapper = new MethodWrapper();
@@ -181,7 +181,7 @@ public final class ReflectUtils {
             }
             wrapper.object = obj;
 
-            Class<?> clazz = obj instanceof Class<?> ? (Class<?>)obj : obj.getClass();
+            Class<?> clazz = obj instanceof Class<?> ? (Class<?>) obj : obj.getClass();
             try {
                 final String key = clazz.getName() + "." + methodName;
                 wrapper.method = CachePools.getMethodCache(key);
@@ -206,7 +206,10 @@ public final class ReflectUtils {
             }
 
             try {
-                return (T)method.invoke(object, args);
+                if (object instanceof Class<?>) {
+                    return (T) method.invoke(null, args);
+                }
+                return (T) method.invoke(object, args);
             } catch (Exception e) {
                 System.err.println(ThrowableUtils.throwableToStr(e));
                 return null;
