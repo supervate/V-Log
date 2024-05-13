@@ -6,7 +6,7 @@
 
     <groupId>io.github.supervate</groupId>
     <artifactId>v-log</artifactId>
-    <version>1.0.0</version>
+    <version>1.1.0</version>
     <url>https://github.com/supervate/V-Log</url>
     <description>V-Log is a simple logging library for Java.</description>
 
