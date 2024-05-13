@@ -1,9 +1,13 @@
 package io.github.supervate.vlog;
 
-import org.junit.jupiter.api.*;
 import io.github.supervate.vlog.appender.DefaultFileAppender;
 import io.github.supervate.vlog.common.ReflectUtils;
 import io.github.supervate.vlog.event.Level;
+import io.github.supervate.vlog.layout.DefaultLineLayout;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 
 import java.io.IOException;
 import java.nio.channels.FileChannel;
@@ -15,7 +19,6 @@ import java.time.LocalDateTime;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ScheduledFuture;
 
-import static io.github.supervate.vlog.common.ReflectUtils.getFieldValue;
 import static io.github.supervate.vlog.event.Level.INFO;
 
 /**
@@ -26,9 +29,9 @@ import static io.github.supervate.vlog.event.Level.INFO;
  * <p>
  * All rights Reserved.
  */
-@SuppressWarnings({ "resource", "BusyWait" })
+@SuppressWarnings({ "resource" })
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-public class DefaultFileAppenderTest extends BaseLoggerTest{
+public class DefaultFileAppenderTest extends BaseLoggerTest {
 
     @Test
     public void logFile() throws IOException, InterruptedException, IllegalAccessException {
@@ -36,7 +39,7 @@ public class DefaultFileAppenderTest extends BaseLoggerTest{
         Files.createDirectories(logPath);
         for (Level limitLevel : Level.values()) {
             // don't clean file
-            DefaultFileAppender defaultFileAppender = new DefaultFileAppender(new DefaultLayout(), logPath, 0);
+            DefaultFileAppender defaultFileAppender = new DefaultFileAppender(new DefaultLineLayout(), logPath, 0);
             defaultFileAppender.start();
             Logger logger = newLogger(DefaultFileAppenderTest.class.getCanonicalName(), defaultFileAppender, limitLevel);
             // test every limit level log print
@@ -66,7 +69,7 @@ public class DefaultFileAppenderTest extends BaseLoggerTest{
         Files.createDirectories(cleanExpiredFileDir);
         int logFileRetentionDays = 7;
         DefaultFileAppender defaultFileAppender = new DefaultFileAppender(
-            new DefaultLayout(),
+            new DefaultLineLayout(),
             cleanExpiredFileDir,
             logFileRetentionDays
         );
@@ -107,7 +110,7 @@ public class DefaultFileAppenderTest extends BaseLoggerTest{
         Path rollingFileDir = LOG_DIR.resolve("rollingFile");
         Files.createDirectories(rollingFileDir);
 
-        DefaultLayout defaultLayout = new DefaultLayout();
+        DefaultLineLayout defaultLayout = new DefaultLineLayout();
         DefaultFileAppender defaultFileAppender = new DefaultFileAppender(defaultLayout, rollingFileDir, 0, 0);
         defaultFileAppender.start();
         Logger logger = newLogger(DefaultFileAppenderTest.class.getCanonicalName(), defaultFileAppender, INFO);
@@ -136,9 +139,9 @@ public class DefaultFileAppenderTest extends BaseLoggerTest{
 
         // 文件剩余空间不足以填充当前消息 且 消息大小小于文件大小时 roll 到下一个文件
         ReflectUtils.setFieldValue(defaultFileAppender, "logFileSizeBytes", logSize * 2 + 1, true);
-        logger.info(message);
-        logger.info(message);
-        logger.info(message);
+        for (int i = 0; i < 3; i++) {
+            logger.info(message);
+        }
         waitingForAsyncAppend(defaultFileAppender);
         Assertions.assertEquals(3, Files.list(rollingFileDir).count());
         System.out.println("after files: ");

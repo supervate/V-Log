@@ -1,15 +1,22 @@
 package io.github.supervate.vlog;
 
 import io.github.supervate.vlog.appender.AppenderCombiner;
+import io.github.supervate.vlog.appender.DefaultFileAppender;
 import io.github.supervate.vlog.appender.DefaultPrintStreamAppender;
 import io.github.supervate.vlog.common.Constants;
 import io.github.supervate.vlog.common.SystemUtils;
-import io.github.supervate.vlog.appender.DefaultFileAppender;
 import io.github.supervate.vlog.event.Level;
 import io.github.supervate.vlog.event.LogEvent;
+import io.github.supervate.vlog.layout.DefaultLineLayout;
+import io.github.supervate.vlog.layout.Layout;
 
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
+
+import static io.github.supervate.vlog.common.Constants.SYSTEM_PROPERTY_LOG_LAYOUT_IMPL;
+import static io.github.supervate.vlog.common.SystemUtils.getSysProperty;
 
 /**
  * 日志工厂
@@ -23,6 +30,8 @@ import java.util.concurrent.ConcurrentHashMap;
  * 3. vt.vlog.file.retention 产生的日志文件存放时间,保留多少天,默认为7天.(单位天)
  * <li>
  * 4. vt.vlog.file.size 产生的日志文件大小,超过多少字节后,产生新的文件,默认为0,不限制.(单位字节)
+ * <li>
+ * 5. vt.vlog.layout.impl 日志格式输出实现类,默认是DefaultLineLayout,支持用户自定义.
  *
  * @author supervate
  * @since 2024/04/27
@@ -33,15 +42,19 @@ public class LoggerFactory {
 
     private static final ConcurrentHashMap<String, Logger> LOGGER_MAP = new ConcurrentHashMap<>();
 
-    private static final AppenderCombiner<LogEvent> APPENDER_COMBINER;
+    private static AppenderCombiner<LogEvent> APPENDER_COMBINER;
 
     volatile private static Level LEVEL;
 
     static {
+        init();
+    }
+
+    private static void init() {
         // appender set
         APPENDER_COMBINER = new AppenderCombiner<>();
         DefaultPrintStreamAppender defaultPrintStreamAppender = new DefaultPrintStreamAppender(
-            new DefaultLayout(),
+            buildLayout(),
             System.out,
             System.err
         );
@@ -51,7 +64,7 @@ public class LoggerFactory {
             .getSysPropertyPath(Constants.SYSTEM_PROPERTY_LOG_DIR)
             .ifPresent(path -> {
                 DefaultFileAppender defaultFileAppender = new DefaultFileAppender(
-                    new DefaultLayout(),
+                    buildLayout(),
                     path,
                     SystemUtils
                         .getSysPropertyInteger(Constants.SYSTEM_PROPERTY_LOG_FILE_RETENTION)
@@ -66,6 +79,38 @@ public class LoggerFactory {
         APPENDER_COMBINER.start();
         // level set
         LEVEL = getLevelConfig();
+    }
+
+    private static Layout<LogEvent> buildLayout() {
+        return getSysProperty(SYSTEM_PROPERTY_LOG_LAYOUT_IMPL).map(LoggerFactory::loadLayout).orElseGet(DefaultLineLayout::new);
+    }
+
+    @SuppressWarnings("unchecked")
+    private static Layout<LogEvent> loadLayout(String className) {
+        Class<?> layoutClazz;
+        Exception loadLayoutException = null;
+        try {
+            layoutClazz = Thread.currentThread().getContextClassLoader().loadClass(className);
+            if (Layout.class.isAssignableFrom(layoutClazz)) {
+                for (Type genericInterface : layoutClazz.getGenericInterfaces()) {
+                    if (genericInterface instanceof ParameterizedType && ((ParameterizedType) genericInterface)
+                        .getRawType()
+                        .equals(Layout.class)) {
+                        Type[] actualTypeArguments = ((ParameterizedType) genericInterface).getActualTypeArguments();
+                        for (Type actualTypeArgument : actualTypeArguments) {
+                            if (actualTypeArgument.getTypeName().equals(LogEvent.class.getTypeName())) {
+                                return (Layout<LogEvent>) layoutClazz.getConstructor().newInstance();
+                            }
+                        }
+                    }
+                }
+            }
+        } catch (Exception e) {
+            loadLayoutException = e;
+        }
+        throw loadLayoutException != null
+              ? new IllegalArgumentException("Invalid layout class: " + className, loadLayoutException)
+              : new IllegalArgumentException("Invalid layout class: " + className);
     }
 
     private static Level getLevelConfig() {

@@ -13,6 +13,9 @@ import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -32,12 +35,15 @@ import static io.github.supervate.vlog.event.Level.INFO;
  * <p>
  * All rights Reserved.
  */
-@SuppressWarnings({ "resource", "BusyWait" })
+@SuppressWarnings({ "resource" })
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class BaseLoggerTest {
 
     protected static final Level TEST_DEFAULT_LEVEL = INFO;
-    protected static final Path LOG_DIR = SystemUtils.getSysTempDir().resolve("test").resolve(BaseLoggerTest.class.getSimpleName());
+    protected static final Path LOG_DIR = SystemUtils
+        .getSysTempDir()
+        .resolve("test")
+        .resolve(BaseLoggerTest.class.getSimpleName());
 
     @BeforeAll
     public static void beforeAll() throws IOException {
@@ -80,6 +86,12 @@ public class BaseLoggerTest {
         }
     }
 
+    protected static String getLogEventTimeStr(LogEvent logEvent) {
+        return LocalDateTime
+            .ofInstant(Instant.ofEpochMilli(logEvent.getEventTime()), ZoneId.systemDefault())
+            .toString();
+    }
+
     protected static void waitingForLoggerFactoryAsyncAppend() throws IllegalAccessException, InterruptedException {
         List<Appender<?>> appenders = getFieldValue(
             getFieldValue(LoggerFactory.class, "APPENDER_COMBINER", true),
@@ -111,10 +123,10 @@ public class BaseLoggerTest {
             .get(asyncAppender);
         if (queue != null) {
             while (!queue.isEmpty()) {
-                Thread.sleep(1);
+                Thread.yield();
             }
         }
-        Thread.sleep(1);
+        Thread.sleep(5);
     }
 
     protected static void makeLevelLogs(Logger logger) {

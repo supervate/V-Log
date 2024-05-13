@@ -33,6 +33,10 @@ public final class SystemUtils {
         return Optional.ofNullable(System.getProperty(name)).map(Integer::parseInt);
     }
 
+    public static Optional<String> getSysProperty(String name) {
+        return Optional.ofNullable(System.getProperty(name));
+    }
+
     public static Path getSysTempDir() {
         return Paths.get(System.getProperty("java.io.tmpdir"));
     }
