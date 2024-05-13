@@ -1,7 +1,7 @@
 package io.github.supervate.vlog.appender;
 
 import io.github.supervate.vlog.exception.CreateAppenderException;
-import io.github.supervate.vlog.Layout;
+import io.github.supervate.vlog.layout.Layout;
 import io.github.supervate.vlog.event.Level;
 import io.github.supervate.vlog.event.LogEvent;
 

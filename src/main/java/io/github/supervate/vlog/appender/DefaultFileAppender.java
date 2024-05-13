@@ -1,11 +1,11 @@
 package io.github.supervate.vlog.appender;
 
-import io.github.supervate.vlog.Layout;
 import io.github.supervate.vlog.common.Constants;
 import io.github.supervate.vlog.common.ThrowableUtils;
 import io.github.supervate.vlog.common.Tuple2;
 import io.github.supervate.vlog.exception.CreateAppenderException;
 import io.github.supervate.vlog.event.LogEvent;
+import io.github.supervate.vlog.layout.Layout;
 
 import java.io.File;
 import java.io.IOException;

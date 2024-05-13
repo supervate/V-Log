@@ -1,5 +1,6 @@
-package io.github.supervate.vlog;
+package io.github.supervate.vlog.layout;
 
+import io.github.supervate.vlog.Logger;
 import io.github.supervate.vlog.common.ThrowableUtils;
 import io.github.supervate.vlog.event.LogEvent;
 
@@ -19,7 +20,7 @@ import static io.github.supervate.vlog.common.Constants.*;
  * <p>
  * All rights Reserved.
  */
-public class DefaultLayout implements Layout<LogEvent> {
+public class DefaultLineLayout implements Layout<LogEvent> {
 
     public static final String UN_DEFINE = "unDefine";
 
@@ -41,7 +42,7 @@ public class DefaultLayout implements Layout<LogEvent> {
             appendItem(Optional.ofNullable(logger).map(Logger::getName).orElse(UN_DEFINE), sb);
             sb.append("-");
             sb.append(SPACE);
-            sb.append(String.format(event.getMessage(), event.getArguments()));
+            sb.append(formatMessage(event.getMessage(), event.getArguments()));
             if (event.getThrowable() != null) {
                 sb.append(System.lineSeparator());
                 sb.append(ThrowableUtils.throwableToStr(event.getThrowable()));

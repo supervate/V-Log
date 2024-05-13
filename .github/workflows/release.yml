@@ -2,7 +2,7 @@ name: Release
 # Run workflow on commits to the `main` branch
 on:
   release:
-    types: [published]
+    types: [released]
   workflow_dispatch:
 
 jobs:
